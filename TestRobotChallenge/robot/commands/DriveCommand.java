@@ -20,8 +20,8 @@ public class DriveCommand extends CommandBase {
   private final DoubleSupplier m_leftSupplier;  // button value for left power 
   private final DoubleSupplier m_rightSupplier; // button value for right power
 
-  private final double kDeadbandRange = 0.02;
-  private static int counter = 49;    // for limiting display
+  //private final double kDeadbandRange = 0.02;
+  private int counter = 49;    // for limiting display
 
   /**
    * Creates a new DriveCommand.
@@ -56,19 +56,17 @@ public class DriveCommand extends CommandBase {
     double leftDrivePower = m_leftSupplier.getAsDouble();
     double rightDrivePower = m_rightSupplier.getAsDouble();
 
+    // ** by default WPILib Differential Drive class applies an input deadband of 0.02
+    // Check if in deadband range of joysticks in which robot should not respond
+    //if (Math.abs(leftDrivePower) < kDeadbandRange) { leftDrivePower = 0; }
+    //if (Math.abs(rightDrivePower) < kDeadbandRange) { rightDrivePower = 0; }
+
     counter++;  //*** only needed if limiting this display
     if (counter % 50 == 0) { 
       SmartDashboard.putNumber("LeftDrive %", leftDrivePower);
       SmartDashboard.putNumber("RightDrive %", rightDrivePower);
     }
 
-    // Check if in deadband range of joysticks in which robot should not respond
-    if (Math.abs(leftDrivePower) < kDeadbandRange) {
-      leftDrivePower = 0;
-    }
-    if (Math.abs(rightDrivePower) < kDeadbandRange) {
-      rightDrivePower = 0;
-    }
     m_driveTrain.doTankDrive(leftDrivePower, rightDrivePower); 
   }
 

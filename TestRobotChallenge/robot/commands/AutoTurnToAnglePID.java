@@ -7,10 +7,9 @@
 
 package frc.robot.commands;
 
-import java.text.MessageFormat;
-
 import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpiutil.math.MathUtil;
 import frc.robot.RobotContainer;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.subsystems.DriveTrain;
@@ -27,8 +26,10 @@ public class AutoTurnToAnglePID extends CommandBase {
   private static final double kD = 0.00;
   //private static final double kF = 0.00;
 
-  private static double currentHeading;
-  private int counter = 4;
+  private double currentHeading;
+  private double currentDiff;
+  private boolean finished = false;
+  private int counter = 1;
 
   /**
    * Creates a new AutoTurnToAnglePID.
@@ -52,6 +53,7 @@ public class AutoTurnToAnglePID extends CommandBase {
     m_driveTrain.resetGyro();  // reset gyro to 0 heading
     pid.reset();              // clear internal state of PIDController
     pid.setTolerance(DriveConstants.kToleranceDegrees, 10.0);    // allow 2 degree tolerance around setpoint, targetAngle in this case
+    finished = false;
     System.out.println("**starting AutoTurnToAnglePID target angle: " + targetAngle);
   }
 
@@ -59,41 +61,39 @@ public class AutoTurnToAnglePID extends CommandBase {
   @Override
   public void execute() {
 
-    currentHeading = m_driveTrain.getHeadingAngle();
-    double pidValue = pid.calculate(currentHeading, targetAngle) / 100;
-    //double pidValue1 = clampValue(pidValue, minOutputValue, maxOutputValue); // clamp pid value to valid range
-    if (counter % 5 == 0) { System.out.println("**PID calc: "+String.format("%.3f", pidValue)+" curr / target: "+String.format("%.3f", currentHeading)+"~"+String.format("%.3f", targetAngle)); }
-
     double rotation;
-    if (pidValue < 0) {
-      rotation = turnSpeed * -1;
-    } else {
-      rotation = turnSpeed;
-    }
+    currentHeading = m_driveTrain.getHeadingAngle();
+    currentDiff = targetAngle - Math.abs(currentHeading);
 
+    // if in range done, else do pid calculation
+    if (currentDiff  >= -DriveConstants.kToleranceDegrees && currentDiff  <= DriveConstants.kToleranceDegrees) {
+      rotation = 0;
+      finished = true;
+      System.out.println("**done - diff: "+String.format("%.3f", currentDiff)+" heading: "+String.format("%.3f", currentHeading)+" target: "+targetAngle); 
+
+    } else {
+      double pidValue = MathUtil.clamp(pid.calculate(currentHeading, targetAngle), -turnSpeed, turnSpeed);
+      if (targetAngle >= 0) {
+        rotation = pidValue;
+      } else {
+        rotation = pidValue * -1;
+      }
+      if (counter++ % 2 == 0) { System.out.println("**PID calc: "+String.format("%.3f", pidValue)+" curr / target: "+String.format("%.3f", currentHeading)+" ~ "+String.format("%.3f", targetAngle)); }
+    }
     m_driveTrain.doArcadeDrive(0, rotation);  // turn using arcadeDrive(xSpeed, zRotation)
   }
-
-  //public static double clampValue(double value, double min, double max) {
-  //  return Math.max(min, Math.min(value, max));		// make sure within range
-  //}
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
 
-    System.out.println("**ending AutoTurnToAnglePID command");
-    //m_driveTrain.stop();    // make sure stopped before exiting
+    System.out.println("**ending AutoTurnToAnglePID command  heading: +"+ String.format("%.3f", currentHeading));
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
- 
-    if (pid.atSetpoint()) {   // see if time to quit
-      System.out.println(MessageFormat.format("**Ending {0}, current heading: {1}", this.getName(), String.format("%.3f", currentHeading)));
-      return true;
-    }
-    return false;
+    //return (currentDiff  >= -DriveConstants.kToleranceDegrees && currentDiff  <= DriveConstants.kToleranceDegrees);
+    return finished;    // checked and set in execute()
   }
 }

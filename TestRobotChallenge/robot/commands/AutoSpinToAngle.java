@@ -18,10 +18,11 @@ public class AutoSpinToAngle extends CommandBase {
   private double targetAngle;
   private double turnPower;
 
-  private double angleDifference;
-  private int counter = 4;
-  private int counter2 = 4;
-  private int counter3 = 4;
+  private double currentHeading;
+  private double currentDiff;
+  private boolean finished = false;
+  private int counter = 1;
+  private int counter2 = 1;
 
   /**
    * Creates a new AutoSpinToAngle
@@ -41,42 +42,50 @@ public class AutoSpinToAngle extends CommandBase {
   public void initialize() {
 
     m_driveTrain.resetGyro();  // reset gyro so 0 is current heading
-    System.out.println("**starting AutoSpinToAngle target angle: " + targetAngle);
+    finished = false;
+    System.out.println("**starting AutoSpinToAngle target angle: "+targetAngle+" heading: "+String.format("%.3f", m_driveTrain.getHeadingAngle()));
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
 
-    angleDifference = getAngleError();   // go check current robot heading vs target angle
-    if (angleDifference < 0 ) {
-        if (counter++ % 5 == 0) { System.out.println("**turn Right Correction: angle diff: "+String.format("%.3f", angleDifference)); }
+    currentHeading = m_driveTrain.getHeadingAngle();
+    currentDiff = targetAngle - Math.abs(currentHeading);  // check current robot heading vs target angle
+
+    if (currentDiff >= -DriveConstants.kToleranceDegrees && currentDiff <= DriveConstants.kToleranceDegrees) {
+      m_driveTrain.doTankDrive(0.0, 0.0);
+      finished = true;
+      System.out.println("**done - diff: "+String.format("%.3f", currentDiff)+" heading: "+String.format("%.3f", currentHeading)+" target: "+targetAngle);  
+    } else if (targetAngle >= 0 ) {
+        if (counter++ % 2 == 0) { System.out.println("**turn Right Correction: angle diff: "+String.format("%.3f", currentDiff)); }
         m_driveTrain.doTankDrive(turnPower, -turnPower); // need to turn to right (slow right side)
     } else {
-        if (counter2++ % 5 == 0) { System.out.println("**turn Left Correction: angle diff: "+String.format("%.3f", angleDifference)); }
+        if (counter2++ % 2 == 0) { System.out.println("**turn Left Correction: angle diff: "+String.format("%.3f", currentDiff)); }
         m_driveTrain.doTankDrive(-turnPower, turnPower); // turn to left (slow left side)
     }
   } 
 
   // get difference between targetAngle and current heading
-  public double getAngleError() {
-    double angleError = 0;
-    angleError = targetAngle - m_driveTrain.getHeadingAngle();  // get difference
-    angleError -= (360 * Math.floor(0.5 + ((angleError) / 360.0)));  // round down if needed
-    return angleError;
-  }
+  //public double getAngleError() {
+  //  double angleError = 0;
+  //  angleError = targetAngle - m_driveTrain.getHeadingAngle();  // get difference
+  //  angleError -= (360 * Math.floor(0.5 + ((angleError) / 360.0)));  // get value between -180 and +180 degrees
+  //  return angleError;
+  //}
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
+
     System.out.println("**ending AutoSpinToAngle command");
-    //m_driveTrain.stop();    // make sure stopped before exiting
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    if (counter3++ % 5 == 0) { System.out.println("**Spin isFinished() - angle diff: "+String.format("%.3f", angleDifference)+" tolerance: "+DriveConstants.kToleranceDegrees); }
-    return (Math.abs(angleDifference) < DriveConstants.kToleranceDegrees);   // see if time to quit
+    //return (currentDiff  >= -DriveConstants.kToleranceDegrees && currentDiff  <= DriveConstants.kToleranceDegrees);
+    return finished;    // checked and set in execute()
   }
+  
 }

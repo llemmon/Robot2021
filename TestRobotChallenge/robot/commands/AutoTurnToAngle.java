@@ -17,10 +17,11 @@ public class AutoTurnToAngle extends CommandBase {
   private final DriveTrain m_driveTrain;
   private double targetAngle;
   private double turnSpeed;
-  private double turnPower;
 
-  private double angleDifference;
-  private int counter = 4;
+  private double currentHeading;
+  private double currentDiff;
+  private boolean finished = false;
+  private int counter = 1;
 
   /**
    * Creates a new AutoTurnToAngle.
@@ -40,29 +41,40 @@ public class AutoTurnToAngle extends CommandBase {
   public void initialize() {
 
     m_driveTrain.resetGyro();  // reset gyro to 0 heading
-    System.out.println("**starting AutoTurnToAngle target angle: " + targetAngle);
+    finished = false;
+    System.out.println("**starting AutoTurnToAngle target angle: " + targetAngle + " speed: " + turnSpeed);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
 
-    angleDifference = getAngleError();   // go check current robot heading vs target angle
-    if (angleDifference >= 0) {
-      turnPower = turnSpeed;
+    double rotation;
+    currentHeading = m_driveTrain.getHeadingAngle();
+    currentDiff = targetAngle - Math.abs(currentHeading);  // check current robot heading vs target angle
+
+    if (currentDiff >= -DriveConstants.kToleranceDegrees && currentDiff <= DriveConstants.kToleranceDegrees) {
+      rotation = 0;
+      finished = true;
+      System.out.println("**done - diff: "+String.format("%.3f", currentDiff)+" heading: "+String.format("%.3f", currentHeading)+" target: "+targetAngle); 
     } else {
-      turnPower = turnSpeed * -1;
+      if (targetAngle >= 0) {
+        rotation = turnSpeed;
+      } else {
+        rotation = turnSpeed * -1;
+      }
+      if (counter++ % 2 == 0) { System.out.println("**currentDiff: "+String.format("%.3f", currentDiff)+" curr / target: "+String.format("%.3f", currentHeading)+" ~ "+String.format("%.3f", targetAngle)); }
     }
-    m_driveTrain.doArcadeDrive(0, turnPower);  // turn using arcade drive
+    m_driveTrain.doArcadeDrive(0, rotation);  // turn using arcadeDrive(xSpeed, zRotation)
   }
 
-    // get difference between targetAngle and current heading
-  public double getAngleError() {
-      double angleError = 0;
-      angleError = targetAngle - m_driveTrain.getHeadingAngle();  // get difference
-      angleError -= (360 * Math.floor(0.5 + ((angleError) / 360.0)));  // round down if needed
-     return angleError;
-  }
+  // get difference between targetAngle and current heading
+  //public double getAngleError() {
+  //    double angleError = 0;
+  //    angleError = targetAngle - m_driveTrain.getHeadingAngle();  // get difference
+  //    angleError -= (360 * Math.floor(0.5 + ((angleError) / 360.0)));  // get shortest angle
+  //   return angleError;
+  //}
 
   // Called once the command ends or is interrupted.
   @Override
@@ -73,7 +85,7 @@ public class AutoTurnToAngle extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    if (counter++ % 5 == 0) { System.out.println("**Turn isFinished() - angle diff: " +String.format("%.3f", angleDifference)+" tolerance: "+DriveConstants.kToleranceDegrees); }
-    return (Math.abs(angleDifference) < DriveConstants.kToleranceDegrees);   // see if time to quit
+    //return (currentDiff  >= -DriveConstants.kToleranceDegrees && currentDiff  <= DriveConstants.kToleranceDegrees);
+    return finished;    // checked and set in execute()
   }
 }

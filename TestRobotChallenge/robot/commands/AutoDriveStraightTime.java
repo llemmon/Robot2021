@@ -27,6 +27,7 @@ public class AutoDriveStraightTime extends CommandBase {
    * Creates a new AutoDriveStraightTime.
    */
   public AutoDriveStraightTime(double speedIn, double timeIn) {
+
     this.m_driveTrain = RobotContainer.m_driveTrain;    // get driveTrain object from RobotContainer
     this.speed = speedIn;
     this.duration = timeIn;   // in seconds
@@ -40,14 +41,14 @@ public class AutoDriveStraightTime extends CommandBase {
   public void initialize() {
 
     startTime = Timer.getFPGATimestamp();   // get start time
-    System.out.println(MessageFormat.format("**Started {0}", this.getName()));
+    System.out.println(MessageFormat.format("**Started {0}  start time: {1}", this.getName(), String.format("%.3f", startTime)));
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
 
-      m_driveTrain.doTankDrive(speed, speed);
+      m_driveTrain.doTankDrive(-speed, -speed);
   }
 
   // Called once the command ends or is interrupted.
@@ -60,8 +61,9 @@ public class AutoDriveStraightTime extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-      double elapsedTime = Timer.getFPGATimestamp() - startTime;    // get elapsed time
-    if (counter++ % 5 == 0) { System.out.println("**AutoDriveStraightTime  elapsed: "+String.format("%.3f", elapsedTime)+" duration: "+duration); }
+
+    double elapsedTime = Timer.getFPGATimestamp() - startTime;    // get elapsed time
+    if (counter++ % 10 == 0) { System.out.println("**AutoDriveStraightTime  elapsed: "+String.format("%.3f", elapsedTime)+" duration: "+duration); }
     return (elapsedTime >= duration);   // check if time to end
   }
 }

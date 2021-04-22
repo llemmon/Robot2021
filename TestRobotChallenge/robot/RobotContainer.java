@@ -13,25 +13,27 @@ import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.StartEndCommand;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
-//import edu.wpi.first.wpilibj2.command.InstantCommand;
-//import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-
 import frc.robot.Constants.OIConstants;
-import frc.robot.autonomous.AutoRunChallenge3;
-import frc.robot.autonomous.PickBlueBalls;
-import frc.robot.autonomous.PickRedBalls;
 import frc.robot.commands.AutoDriveStraightTime;
 import frc.robot.commands.AutoDriveStraightUnits;
+import frc.robot.autonomous.AutoGoBarrelPath;
+import frc.robot.autonomous.AutoGoBouncePath;
+//import frc.robot.autonomous.AutoGoBluePath1;
+//import frc.robot.autonomous.AutoGoRedPath1;
+import frc.robot.autonomous.AutoGoSlalomPath;
+import frc.robot.autonomous.AutoGoToBallOne;
 import frc.robot.commands.AutoSpinToAngle;
+import frc.robot.commands.AutoSpinToAnglePID;
 import frc.robot.commands.AutoTurnToAngle;
+import frc.robot.commands.AutoTurnToAnglePID;
 import frc.robot.commands.DriveCommand;
 import frc.robot.subsystems.DriveTrain;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.StartEndCommand;
+//import edu.wpi.first.wpilibj2.command.InstantCommand;
+//import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+//import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 
 /**
  * This class is where the bulk of the robot should be declared.  Since Command-based is a
@@ -48,12 +50,16 @@ public class RobotContainer {
   private static final XboxController xController = new XboxController(0);
   //private static final Joystick auxController = new Joystick(1);
 
-  private static Command autoGoStraightCommand;
-  private static Command autoGoUnitsCommand;
-  private static Command autoSpinCommand;
-  private static Command autoPickBlueBalls;
-  private static Command autoPickRedBalls;
-  private static Command autoDoChallenge3;
+  private static Command autoDriveStraightCommand;
+  private static Command autoDriveUnitsCommand;
+  private static Command autoDriveTurnCommand;
+  private static Command autoDriveSpinCommand;
+  private static Command autoGoBluePathCommand;
+  private static Command autoGoRedPathCommand;
+  private static Command autoGoBouncePathCommand;
+  private static Command autoGoBarrelPathCommand;
+  private static Command autoGoSlalomPathCommand;
+  private static Command autoGoToBallOneCommand;
 
   // ** set up autonomous chooser
   SendableChooser<Command> autoChooser = new SendableChooser<Command>();
@@ -70,12 +76,15 @@ public class RobotContainer {
     buildAutonomousCommands();    // go create autonomous commands
 
     // load autonomous commands in autochooser and put on dashboard
-    autoChooser.setDefaultOption("Auto Drive", autoGoStraightCommand );
-    autoChooser.addOption("Auto Blue Balls", autoPickBlueBalls );
-    autoChooser.addOption("Auto Red Balls", autoPickRedBalls );
-    autoChooser.addOption("Auto To Angle", autoSpinCommand );
-    autoChooser.addOption("Auto Units", autoGoUnitsCommand );
-    autoChooser.addOption("Auto Challenge3", autoDoChallenge3 );
+    autoChooser.setDefaultOption("Auto Drive", autoDriveStraightCommand );
+    autoChooser.addOption("Auto Bounce Path", autoGoBouncePathCommand );
+    autoChooser.addOption("Auto Barrel Path", autoGoBarrelPathCommand );
+    autoChooser.addOption("Auto Spin", autoDriveSpinCommand );
+    autoChooser.addOption("Auto Turn", autoDriveTurnCommand );
+    autoChooser.addOption("Auto Units", autoDriveUnitsCommand );
+    autoChooser.addOption("Auto Blue Path", autoGoBluePathCommand );
+    autoChooser.addOption("Auto Red Path", autoGoRedPathCommand );
+    autoChooser.addOption("Auto Slalom", autoGoSlalomPathCommand );
     SmartDashboard.putData("Auto Choices", autoChooser);
 
     // Configure the button bindings
@@ -95,7 +104,7 @@ public class RobotContainer {
     final JoystickButton xButtonA = new JoystickButton(xController, OIConstants.kXBoxButtonA);
     xButtonA.whenHeld(new AutoDriveStraightTime(0.55, 3.0));     // check .whenHeld() vs .whileHeld()
     //xButtonA.whileHeld(new AutoDriveStraightTime(0.55, 3.0));  // whileHeld() reschedules if finished, whenHeld() command one time only
-    //xButtonA.whenPressed(new PickBlueBalls(m_driveTrain));
+    //xButtonA.whenPressed(new AutoGoBluePath(m_driveTrain));
 
     // start driveTrain when XBox buttonB pressed, stop driveTrain when pressed again
     final JoystickButton xButtonB = new JoystickButton(xController, OIConstants.kXBoxButtonB);
@@ -109,7 +118,7 @@ public class RobotContainer {
 
     // spin to angle when XBox buttonX pressed
     final JoystickButton xButtonX = new JoystickButton(xController, OIConstants.kXBoxButtonX);
-    xButtonX.whenPressed(new AutoTurnToAngle(45.0, 0.55))
+    xButtonX.whenPressed(new AutoTurnToAngle(-45.0, 0.55))
           .whenReleased(() -> m_driveTrain.stop(), m_driveTrain);
 
     // bind XBox buttonX to a sequentialCommandGroup (do multiple commands in sequence)
@@ -144,18 +153,32 @@ public class RobotContainer {
     //            new WaitCommand(2.0),
     //            new InstantCommand(m_driveTrain::stop, m_driveTrain)
     //  ));
-  }
+
+    // bind multiple commands to a single button
+    //final JoystickButton auxButtonX = new JoystickButton(auxController, OIConstants.kLogiTechButtonX);
+    //auxButtonX.whileHeld(() -> mIntake.setOpenLoop(0.7))
+    //          .whileHeld(() -> mFeeder.setOpenLoop(-0.6))
+    //          .whileHeld(() -> mRollers.setOpenLoop(-1))
+    //          .whenReleased(() -> mIntake.stop())
+    //          .whenReleased(() -> mFeeder.stop())
+    //          .whenReleased(() -> mRollers.stop());
+}
 
   private void buildAutonomousCommands() {
 
-     // create autonomous command to drive forward
-     autoGoStraightCommand = new AutoDriveStraightTime(0.45, 2.0);
-     autoGoUnitsCommand = new AutoDriveStraightUnits(0.45, 2.0);
-     autoSpinCommand = new AutoSpinToAngle(45, 0.40);
-
-     autoPickBlueBalls = new PickBlueBalls(m_driveTrain);
-     autoPickRedBalls = new PickRedBalls(m_driveTrain);
-     autoDoChallenge3 = new AutoRunChallenge3(m_driveTrain);
+     // create autonomous commands
+     autoDriveStraightCommand = new AutoDriveStraightTime(0.4, 3.0);
+     autoDriveUnitsCommand = new AutoDriveStraightUnits(-0.5, 120.0);
+     autoDriveTurnCommand = new AutoTurnToAnglePID(45.0, 0.4);
+     //autoDriveTurnCommand = new AutoTurnToAngle(-45.0, 0.4);
+     autoDriveSpinCommand = new AutoSpinToAnglePID(45.0, 0.4);
+     //autoDriveSpinCommand = new AutoSpinToAngle(45.0, 0.4);
+     autoGoBouncePathCommand = new AutoGoBouncePath(m_driveTrain);
+     autoGoBarrelPathCommand = new AutoGoBarrelPath(m_driveTrain);
+     autoGoSlalomPathCommand = new AutoGoSlalomPath(m_driveTrain);
+     autoGoToBallOneCommand = new AutoGoToBallOne(0.50).withTimeout(10);
+     //autoGoBluePathCommand = new AutoGoBluePath1(m_driveTrain);
+     //autoGoRedPathCommand = new AutoGoRedPath1(m_driveTrain);
   }
 
   /**
@@ -164,11 +187,19 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-
     // get Command to run in autonomous
     System.out.println("***getting Autonomous command");
     //Command autoSelected = autoChooser.getSelected();
     //return autoSelected;
-    return autoGoUnitsCommand;
+    //return autoDriveStraightCommand;
+    //return autoDriveSpinCommand;
+    //return autoDriveTurnCommand;
+    return autoDriveUnitsCommand;
+    //return autoGoBluePathCommand;
+    //return autoGoRedPathCommand;
+    //return autoGoBouncePathCommand;
+    //return autoGoBarrelPathCommand;
+    //return autoGoSlalomPathCommand;
+    //return autoGoToBallOneCommand;
   }
 }
