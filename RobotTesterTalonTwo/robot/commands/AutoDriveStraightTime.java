@@ -21,7 +21,7 @@ public class AutoDriveStraightTime extends CommandBase {
   private double duration;
   
   private double startTime = 0.0;
-  private int counter = 4;
+  private int counter = 1;
 
   /**
    * Creates a new AutoDriveStraightTime.
@@ -54,14 +54,14 @@ public class AutoDriveStraightTime extends CommandBase {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    System.out.println(MessageFormat.format("**Ended {0}", this.getName()));
+    System.out.println(MessageFormat.format("**Ended {0}  time: {1}", this.getName(), startTime));
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
     double elapsedTime = Timer.getFPGATimestamp() - startTime;    // get elapsed time
-    if (counter++ % 10 == 0) { System.out.println("**AutoDriveStraightTime  elapsed: "+String.format("%.3f", elapsedTime)+" duration: "+duration); }
+    if (counter++ % 2 == 0) { System.out.println("**AutoDriveStraightTime  elapsed: "+String.format("%.3f", elapsedTime)+" duration: "+duration); }
     return (elapsedTime >= duration);   // check if time to end
   }
 }

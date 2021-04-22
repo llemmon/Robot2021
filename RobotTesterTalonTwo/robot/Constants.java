@@ -31,18 +31,30 @@ public final class Constants {
         public static final int LEFT_ENCODER_B = 4;
         public static final int RIGHT_ENCODER_A = 1;
         public static final int RIGHT_ENCODER_B = 3;
-        public static final int kEncoderTicksPerRevolution = 42;
 
         // circumference = (2 * PI * radius) or (PI * diameter)
-        public static final double WHEEL_DIAMETER = 8.0; // in inches
-        public static final double PULSES_PER_REVOLUTION = 42.0;
-        public static final double INCHES_PER_PULSE = Math.PI * WHEEL_DIAMETER / PULSES_PER_REVOLUTION;
-        public static final double WHEEL_TRACK = 22.75; // distance from wheels on 1 side to other side
-        public static final double INCHES_PER_DEGREE = Math.PI * WHEEL_DIAMETER / 360.0; // circum / 360
+        public static final double kWheelDiameter = 6.375; // in inches
+        public static final double kWheelDiameterInMeters = Units.inchesToMeters(6.375);
+        public static final double kEncoderTicksPerRevolution = 42.0;  // Hall-Sensor Encoder resolution
+        public static final double kSurfaceFactor = 8.45;   // to adjust for different surfaces
+        public static final double kDriveMotorGearRatio = 8.30 / 1.0;  // gear ratio of drive motor
+        //public static final double kInchesPerPulse = (Math.PI * kWheelDiameter) / (kEncoderTicksPerRevolution * kDriveMotorGearRatio); //formula for in/pulse
+        //public static final double kInchesPerPulse = (Math.PI * kWheelDiameter) / (kEncoderTicksPerRevolution * kSurfaceFactor);
+        //public static final double kInchesPerPulse = 0.0170;    // for Boomer
+        public static final double kInchesPerPulse = 0.0445;   // for Chef
+        public static final double kInchesPerDegree = (Math.PI * kWheelDiameter) /  360.0; // circum / 360
+        public static final double kWheelTrackWidth = 22.75; // distance from wheels on 1 side to other side
 
-        public static final double wheelDiameterInMeters = Units.inchesToMeters(8.0);
-        public static final double kToleranceDegrees = 2.0;  //indicates how close to "on target" acceptable
-        public static final boolean kGyroReversed = false;
+        public static final double kTurnP = 1.0;
+        public static final double kTurnI = 0.0;
+        public static final double kTurnD = 0.0;
+    
+        public static final double kToleranceDegrees = 3.0;  //indicates how close to "on target" acceptable
+        public static final double kTurnToleranceDeg = 3.0;
+        public static final double kTurnRateToleranceDegPerS = 10.0; // degrees per second
+        //public static final double kMaxTurnRateDegPerS = 100;
+        //public static final double kMaxTurnAccelerationDegPerSSquared = 300;
+        //public static final boolean kGyroReversed = false; 
     }
 
     public static final class OIConstants {

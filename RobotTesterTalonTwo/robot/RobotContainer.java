@@ -17,6 +17,7 @@ import frc.robot.Constants.OIConstants;
 import frc.robot.commands.AutoDriveStraightTime;
 import frc.robot.commands.AutoGoBluePath;
 import frc.robot.commands.AutoSpinToAngle;
+import frc.robot.commands.AutoSpinToAnglePID;
 import frc.robot.commands.AutoTurnToAngle;
 //import frc.robot.commands.AutoGoBluePath;
 //import frc.robot.commands.AutoSpinToAngle;
@@ -139,6 +140,15 @@ public class RobotContainer {
     //            new WaitCommand(2.0),
     //            new InstantCommand(m_driveTrain::stop, m_driveTrain)
     //          ));
+
+    // bind multiple commands to a single button
+    //final JoystickButton auxButtonX = new JoystickButton(auxController, OIConstants.kLogiTechButtonX);
+    //auxButtonX.whileHeld(() -> mIntake.setOpenLoop(0.7))
+    //          .whileHeld(() -> mFeeder.setOpenLoop(-0.6))
+    //          .whileHeld(() -> mRollers.setOpenLoop(-1))
+    //          .whenReleased(() -> mIntake.stop())
+    //          .whenReleased(() -> mFeeder.stop())
+    //          .whenReleased(() -> mRollers.stop());
   }
 
   private void buildAutonomousCommands() {
@@ -146,8 +156,8 @@ public class RobotContainer {
     // define autonomous commands
     autoDriveStraightCommand = new AutoDriveStraightTime(0.6, 2.0);
     autoDriveBackupCommand = new AutoDriveStraightTime(-0.5, 2.5);
-    autoDriveTurnCommand = new AutoTurnToAngle(45.0, 0.5);
-    autoDriveSpinCommand = new AutoSpinToAngle(45.0, 0.5);
+    autoDriveTurnCommand = new AutoTurnToAngle(45.0, 0.4);
+    autoDriveSpinCommand = new AutoSpinToAnglePID(45.0, 0.4);
     autoGoBluePathCommand = new AutoGoBluePath(m_driveTrain);
   }
 

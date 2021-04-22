@@ -7,8 +7,6 @@
 
 package frc.robot.commands;
 
-import java.text.DecimalFormat;
-
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.RobotContainer;
 import frc.robot.Constants.DriveConstants;
@@ -21,9 +19,8 @@ public class AutoSpinToAngle extends CommandBase {
   private double turnPower;
 
   private double angleDifference;
-  private int counter = 4;
-  private int counter2 = 4;
-  private int counter3 = 4;
+  private int counter = 1;
+  private int counter2 = 1;
 
   //private static final DecimalFormat dFormat = new DecimalFormat("###.####");
 
@@ -53,11 +50,11 @@ public class AutoSpinToAngle extends CommandBase {
   public void execute() {
 
     angleDifference = getAngleError();   // go check current robot heading vs target angle
-    if (angleDifference < 0 ) {
-        if (counter++ % 5 == 0) { System.out.println("**turn Right Correction: angle diff: "+String.format("%.3f", angleDifference)); }
+    if (angleDifference > 0 ) {
+        if (counter++ % 2 == 0) { System.out.println("**turn Right Correction: angle diff: "+String.format("%.3f", angleDifference)); }
         m_driveTrain.doTankDrive(turnPower, -turnPower); // need to turn to right (slow right side)
     } else {
-        if (counter2++ % 5 == 0) { System.out.println("**turn Left Correction: angle diff: "+String.format("%.3f", angleDifference)); }
+        if (counter2++ % 2 == 0) { System.out.println("**turn Left Correction: angle diff: "+String.format("%.3f", angleDifference)); }
         m_driveTrain.doTankDrive(-turnPower, turnPower); // turn to left (slow left side)
     }
   }
@@ -67,7 +64,7 @@ public class AutoSpinToAngle extends CommandBase {
       double angleError = 0;
       angleError = targetAngle - m_driveTrain.getHeadingAngle();  // get difference
       angleError -= (360 * Math.floor(0.5 + ((angleError) / 360.0)));  // round down if needed
-     return angleError;
+      return angleError;
   }
 
   // Called once the command ends or is interrupted.
@@ -80,7 +77,7 @@ public class AutoSpinToAngle extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    if (counter3++ % 5 == 0) { System.out.println("**Spin isFinished() - angle diff: "+String.format("%.3f", angleDifference)+" tolerance: "+DriveConstants.kToleranceDegrees); }
-    return (Math.abs(angleDifference) < DriveConstants.kToleranceDegrees);   // see if time to quit
+    //System.out.println("**angle diff: "+String.format("%.3f", angleDifference+" tolerance: "+DriveConstants.kToleranceDegrees; 
+    return (angleDifference >= -DriveConstants.kToleranceDegrees && angleDifference  <= DriveConstants.kToleranceDegrees);
   }
 }

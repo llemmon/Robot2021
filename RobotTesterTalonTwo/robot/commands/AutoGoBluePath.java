@@ -9,7 +9,7 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
+//import edu.wpi.first.wpilibj2.command.WaitCommand;
 //import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 //import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 //import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
@@ -29,14 +29,11 @@ public class AutoGoBluePath extends SequentialCommandGroup {
   public AutoGoBluePath(DriveTrain driveTrain) {
 
     addCommands(
-	    new InstantCommand(() -> driveTrain.stop(), driveTrain),
-	    // Drive forward the specified distance
-	    new AutoDriveStraightTime( 0.55, 3.0),
-	    new WaitCommand(2.0),
-	    // Drive backward the specified distance
-	    new AutoDriveStraightTime( -0.55, 3.0),
-	    new InstantCommand(driveTrain::stop, driveTrain),
-	    new WaitCommand(2.0)
+	    new InstantCommand(() -> driveTrain.stop(), driveTrain),    // make sure stopped
+	    new AutoDriveStraightTime( 0.40, 2.0),  // drive forward
+      new AutoSpinToAnglePID(45.0, 0.5),      // spin 45 deg
+      new AutoDriveStraightTime( 0.40, 2.0),  // drive forward
+	    new InstantCommand(driveTrain::stop, driveTrain)       // make sure stopped
     );
   }
 }

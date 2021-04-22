@@ -44,8 +44,7 @@ public class DriveTrain extends SubsystemBase {
 
   private static final boolean kSquareInputs = true;
   private static final boolean kSkipGyro = false;
-  private static int counter = 49; // for limiting display
-  private static int counter2 = 9;
+  private static int counter = 4; // for limiting display
 
   /**
    * Creates a new DriveTrain.
@@ -75,6 +74,7 @@ public class DriveTrain extends SubsystemBase {
     motorDriveRight1.configSupplyCurrentLimit(supplyLimit);
     motorDriveRight2.configSupplyCurrentLimit(supplyLimit);
 
+    differentialDrive.setDeadband(0.03);
     differentialDrive.setSafetyEnabled(false);    // ***to avoid error 'differentialDrive not fed often enough'
 
     if (kSkipGyro) {
@@ -92,7 +92,10 @@ public class DriveTrain extends SubsystemBase {
       } catch (RuntimeException ex) {
           DriverStation.reportError("Error instantiating navX-MXP:  " + ex.getMessage(), true);
       }
-  
+      while (m_Gyro.isCalibrating()) {
+        try { Thread.sleep(500); } catch (Exception e) { System.out.println(e); } //sleep in milliseconds
+        System.out.println("**gyro isCalibrating . . .");
+      }
       //SmartDashboard.putBoolean("gyro connected", m_Gyro.isConnected());
       System.out.println("**gyro connected " + m_Gyro.isConnected());
     }
@@ -111,10 +114,10 @@ public class DriveTrain extends SubsystemBase {
    */
   public void doTankDrive(double leftDrivePercent, double rightDrivePercent) {
 
-    if (counter++ % 50 == 0) { System.out.println("**driveTrain power L-R: " + leftDrivePercent +" - "+ rightDrivePercent); }
+    if (counter++ % 5 == 0) { System.out.println("**driveTrain power L-R: "+String.format("%.3f  ", leftDrivePercent)+" ~ "+String.format("%.3f  ", rightDrivePercent)); }
 
-    leftDrivePercent = leftDrivePercent * 0.75;
-    rightDrivePercent = rightDrivePercent * 0.75;
+    //leftDrivePercent = leftDrivePercent * 0.75;
+    //rightDrivePercent = rightDrivePercent * 0.75;
     // SquareInputs adjust inputs at low speeds so better control - note 1.0 * 1.0 is still 1
     differentialDrive.tankDrive(leftDrivePercent, rightDrivePercent, kSquareInputs); // send output to drive train
   
@@ -138,47 +141,42 @@ public class DriveTrain extends SubsystemBase {
   }
 
     // http://pdocs.kauailabs.com/navx-mxp/guidance/terminology (for pitch, roll, yaw, IMU terminology)
-    public double getRelativeAngle() {
-      if (kSkipGyro) { return 0.0; }
-      return ((m_Gyro.getAngle() * Math.PI / 180.0));
-    }
+    //public double getRelativeAngle() {
+    //  return ((m_Gyro.getAngle() * Math.PI / 180.0));
+    //}
   
-    public double getGyroAngle() {
-      if (kSkipGyro) { return 0.0; }
-      double angle = ((m_Gyro.getAngle() * Math.PI / 180.0) % (2 * Math.PI));
-      if (m_Gyro.getAngle() < 0) {
-        angle += (2 * Math.PI);
-      }
-      return angle;
-    } // Converts m_Gyro Angle (0-360) to Radians (0-2pi)
+    //public double getGyroAngle() {
+    //  double angle = ((m_Gyro.getAngle() * Math.PI / 180.0) % (2 * Math.PI));
+    //  if (m_Gyro.getAngle() < 0) {
+    //    angle += (2 * Math.PI);
+    //  }
+    //  return angle;
+    //} // Converts m_Gyro Angle (0-360) to Radians (0-2pi)
   
     public double getHeadingAngle() {
-      if (kSkipGyro) { return 0.0; }
-      if (counter2++ % 10 == 0) {
-        System.out.println("gyropitch " + String.format("%.3f", m_Gyro.getPitch()));
-        System.out.println("gyroroll  " + String.format("%.3f", m_Gyro.getRoll()));
-        System.out.println("gyroyaw   " + String.format("%.3f", m_Gyro.getYaw()));
-        //System.out.println("gyrorawZ  " + String.format("%.3f", m_Gyro.getRawGyroZ()));
-        //System.out.println("gyrorawY  " + String.format("%.3f", m_Gyro.getRawGyroY()));
-        //System.out.println("gyrorawX  " + String.format("%.3f", m_Gyro.getRawGyroX()));
-        System.out.println("gyroangle " + String.format("%.3f", m_Gyro.getAngle()));
-        System.out.println("gyrorelat angle " + String.format("%.3f", getRelativeAngle()));
-    }
+    //if (counter3++ % 5 == 0) {
+      //System.out.println("gyropitch " + String.format("%.3f", m_Gyro.getPitch()));
+      //System.out.println("gyroroll  " + String.format("%.3f", m_Gyro.getRoll()));
+      //System.out.println("gyroyaw   " + String.format("%.3f", m_Gyro.getYaw()));
+      //System.out.println("gyrorawZ  " + String.format("%.3f", m_Gyro.getRawGyroZ()));
+      //System.out.println("gyrorawY  " + String.format("%.3f", m_Gyro.getRawGyroY()));
+      //System.out.println("gyrorawX  " + String.format("%.3f", m_Gyro.getRawGyroX()));
+      //System.out.println("gyroangle " + String.format("%.3f", m_Gyro.getAngle()));
+      //System.out.println("gyrorelat angle " + String.format("%.3f", getRelativeAngle()));
+    //}
     //return Math.IEEEremainder(m_Gyro.getAngle(), 360.0) * (DriveConstants.kGyroReversed ? -1.0 : 1.0);
-    return Math.IEEEremainder(m_Gyro.getYaw(), 360.0) * (DriveConstants.kGyroReversed ? -1.0 : 1.0);
+    //return Math.IEEEremainder(m_Gyro.getYaw(), 360.0) * (DriveConstants.kGyroReversed ? -1.0 : 1.0);
+    return Math.IEEEremainder(m_Gyro.getYaw(), 360.0);
     }
   
     public double getYaw() {
-      if (kSkipGyro) { return 0.0; }
       return m_Gyro.getYaw(); // get rotation around Z axis for current heading
     }
   
     public void resetGyro() {
-      if (!kSkipGyro) {
         // "Zero" yaw (whatever direction sensor is pointing now becomes new "Zero" degrees
-        m_Gyro.reset();
-        m_Gyro.zeroYaw();   // yaw is only thing that can be reset, pitch and roll can't (see docs)
-      }
+      m_Gyro.reset();
+      m_Gyro.zeroYaw();   // yaw is only thing that can be reset, pitch and roll can't (see docs)
     }
 
   public void stop() {

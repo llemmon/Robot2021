@@ -28,12 +28,12 @@ public class AutoTurnASquare extends SequentialCommandGroup {
     addCommands(
 	    new InstantCommand(() -> driveTrain.stop(), driveTrain),
       new AutoDriveStraightTime(0.45, 2.0).andThen(new WaitCommand(0.4)), // go forward
-      new AutoSpinToAngle(-90.0, 0.40).andThen(new WaitCommand(0.4)),       // turn right
+      new AutoSpinToAngle(90.0, 0.45).andThen(new WaitCommand(0.4)),       // turn right
       new AutoDriveStraightTime(0.45, 2.0).andThen(new WaitCommand(0.4)),   // go forward
-      new AutoSpinToAngle(-90.0, 0.40).andThen(new WaitCommand(0.4)),       // turn right
+      new AutoSpinToAngle(90.0, 0.45).andThen(new WaitCommand(0.4)),       // turn right
       new WaitCommand(2.0),
       new AutoDriveStraightTime(0.45, 2.0).andThen(new WaitCommand(0.4)),   // go forward
-      new AutoSpinToAngle(-90.0, 0.40).andThen(new WaitCommand(0.4)),       // turn right
+      new AutoSpinToAngle(90.0, 0.45).andThen(new WaitCommand(0.4)),       // turn right
       new AutoDriveStraightTime(0.45, 2.0),    // go forward to starting point
       new InstantCommand(driveTrain::stop, driveTrain)
     );

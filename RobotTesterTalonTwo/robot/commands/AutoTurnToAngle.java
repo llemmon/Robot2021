@@ -20,7 +20,6 @@ public class AutoTurnToAngle extends CommandBase {
   private double turnPower;
 
   private double angleDifference;
-  private int counter = 4;
 
   /**
    * Creates a new AutoTurnToAngle.
@@ -73,7 +72,7 @@ public class AutoTurnToAngle extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    if (counter++ % 5 == 0) { System.out.println("**Turn isFinished() - angle diff: "+String.format("%.3f", angleDifference)+" tolerance: "+DriveConstants.kToleranceDegrees); }
-    return (Math.abs(angleDifference) < DriveConstants.kToleranceDegrees);   // see if time to quit
+   //System.out.println("**angle diff: "+String.format("%.3f", angleDifference+" tolerance: "+DriveConstants.kToleranceDegrees; 
+   return (angleDifference >= -DriveConstants.kToleranceDegrees && angleDifference  <= DriveConstants.kToleranceDegrees);
   }
 }
