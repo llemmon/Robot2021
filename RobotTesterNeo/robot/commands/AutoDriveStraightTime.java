@@ -46,12 +46,13 @@ public class AutoDriveStraightTime extends CommandBase {
     //timer.reset();
 
     startTime = Timer.getFPGATimestamp();   // second way to keep track of time
-    System.out.println(MessageFormat.format("**Started {0}", this.getName()));
+    System.out.println(MessageFormat.format("**Started {0}  start time: {1}", this.getName(), String.format("%.3f", startTime)));
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    
       m_driveTrain.doTankDrive(speed, speed);
   }
 
@@ -60,13 +61,13 @@ public class AutoDriveStraightTime extends CommandBase {
   public void end(boolean interrupted) {
     //SmartDashboard.putString("Auto Command", "Finished AutoDriveStraightTime");
     System.out.println(MessageFormat.format("**Ended {0}", this.getName()));
-    //m_driveTrain.stop();
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
 
+    //System.out.println("current distance: " + m_driveTrain.getAveDistanceInch());
     //return timer.hasElapsed(duration);   // check if time to end
     double elapsedTime = Timer.getFPGATimestamp() - startTime;    // second way to keep track of time
     if (counter++ % 10 == 0) { System.out.println("**AutoDriveStraightTime  elapsed: "+String.format("%.3f", elapsedTime)+" duration: "+duration); }

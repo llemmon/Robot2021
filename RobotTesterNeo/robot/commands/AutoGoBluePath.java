@@ -9,7 +9,7 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
+//import edu.wpi.first.wpilibj2.command.WaitCommand;
 //import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 //import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 //import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
@@ -28,15 +28,29 @@ public class AutoGoBluePath extends SequentialCommandGroup {
    */
   public AutoGoBluePath(DriveTrain driveTrain) {
 
+    // positive angles turn right, negative angles turn left
     addCommands(
-	    new InstantCommand(() -> driveTrain.stop(), driveTrain),
-	    // Drive forward the specified distance
-	    new AutoDriveStraightTime( 0.45, 3.0),
-	    new WaitCommand(2.0),
-	    // Drive backward the specified distance
-	    new AutoDriveStraightTime( -0.45, 3.0),
-	    new InstantCommand(driveTrain::stop, driveTrain),
-	    new WaitCommand(2.0)
+	    new InstantCommand(() -> driveTrain.stop(), driveTrain),    // make sure stopped
+      new AutoDriveStraightTime(0.5, 5.5), //forward DONE
+      new AutoSpinToAnglePID(35.0, 0.50), //turn down DONE
+      new AutoDriveStraightTime(0.50, 3.0), //left
+      new AutoSpinToAnglePID( -55.0, -0.45), //Temp
+      new AutoDriveStraightTime(0.60, 2.0), // up
+      new AutoSpinToAnglePID(-30.0, 0.50), // turn right 
+      new AutoDriveStraightTime(0.50, 4.0),
+
+      /* Temp
+      // forward but up a bit 
+
+      new AutoDriveStraightTime(0.50, 2.0), //up  
+      new AutoSpinToAnglePID(45.0, 0.50), // turn left 
+      new AutoSpinToAnglePID(30.0, 0.50), // turn down  
+      new AutoDriveStraightTime(0.50, 2.0), // go down  
+      new AutoSpinToAnglePID(-30.0, 0.50), // turn right a bit 
+      new AutoDriveStraightTime(0.50, 2.0), // up 
+      new AutoSpinToAnglePID(45.0, 0.50), // turn left */ 
+      
+      new InstantCommand(driveTrain::stop, driveTrain)       // make sure stopped
     );
   }
 }

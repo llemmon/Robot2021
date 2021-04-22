@@ -8,8 +8,8 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.GenericHID;
-//import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
+//import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -19,14 +19,16 @@ import frc.robot.commands.AutoDriveStraightUnits;
 import frc.robot.commands.AutoGoBluePath;
 import frc.robot.commands.AutoGoRedPath;
 import frc.robot.commands.AutoSpinToAngle;
+import frc.robot.commands.AutoSpinToAnglePID;
 import frc.robot.commands.AutoTurnToAngle;
+import frc.robot.commands.AutoTurnToAnglePIDCmd;
 import frc.robot.commands.DriveCommand;
 import frc.robot.subsystems.DriveTrain;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
+//import edu.wpi.first.wpilibj2.command.InstantCommand;
+//import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+//import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 
 /**
@@ -143,16 +145,25 @@ public class RobotContainer {
     //            new WaitCommand(2.0),
     //            new InstantCommand(m_driveTrain::stop, m_driveTrain)
     //  ));
+
+    // bind multiple commands to a single button
+    //final JoystickButton auxButtonX = new JoystickButton(auxController, OIConstants.kLogiTechButtonX);
+    //auxButtonX.whileHeld(() -> mIntake.setOpenLoop(0.7))
+    //          .whileHeld(() -> mFeeder.setOpenLoop(-0.6))
+    //          .whileHeld(() -> mRollers.setOpenLoop(-1))
+    //          .whenReleased(() -> mIntake.stop())
+    //          .whenReleased(() -> mFeeder.stop())
+    //          .whenReleased(() -> mRollers.stop());
   }
 
   private void buildAutonomousCommands() {
 
     // create autonomous commands
-    autoDriveStraightCommand = new AutoDriveStraightTime(0.6, 2.0);
-    autoDriveUnitsCommand = new AutoDriveStraightUnits(0.6, 2.0);
+    autoDriveStraightCommand = new AutoDriveStraightTime(0.3, 3.0);
+    autoDriveUnitsCommand = new AutoDriveStraightUnits(0.5, 24.0);
     autoDriveBackupCommand = new AutoDriveStraightTime(-0.5, 2.5);
-    autoDriveTurnCommand = new AutoTurnToAngle(35.0, 0.35);
-    autoDriveSpinCommand = new AutoSpinToAngle(30.0, 0.5);
+    autoDriveTurnCommand = new AutoTurnToAnglePIDCmd(30.0, m_driveTrain).withTimeout(4);
+    autoDriveSpinCommand = new AutoSpinToAnglePID(45.0, 0.4);
     autoGoBluePathCommand = new AutoGoBluePath(m_driveTrain);
     autoGoRedPathCommand = new AutoGoRedPath(m_driveTrain);
  }
@@ -165,12 +176,12 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
       // get Command to run in autonomous
       System.out.println("***getting Autonomous command");
-      Command autoSelected = autoChooser.getSelected();
+      //Command autoSelected = autoChooser.getSelected();
       //return autoSelected;
-      //return autoDriveStraightCommand;
-      //return autoDriveSpinCommand;
-      return autoDriveTurnCommand;
+      return autoDriveStraightCommand;
       //return autoDriveUnitsCommand;
+      //return autoDriveSpinCommand;
+      //return autoDriveTurnCommand;
       //return autoDriveBackupCommand;
       //return autoGoBluePathCommand;
       //return autoGoRedPathCommand;
